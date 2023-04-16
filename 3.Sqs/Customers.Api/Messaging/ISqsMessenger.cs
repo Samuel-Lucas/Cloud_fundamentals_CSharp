@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Amazon.SQS.Model;
 
 namespace Customers.Api.Messaging
 {
     public interface ISqsMessenger
     {
-        
+        Task<SendMessageResponse> SendMessageAsync<T>(T message);
     }
 }
