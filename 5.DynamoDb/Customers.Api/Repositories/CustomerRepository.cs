@@ -57,7 +57,17 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<IEnumerable<CustomerDto>> GetAllAsync()
     {
-        return default;
+        var scanRequest = new ScanRequest()
+        {
+            TableName = _tableName,
+        };
+
+        var response  = await _dynamoDB.ScanAsync(scanRequest);
+        return response.Items.Select(x =>
+        {
+            var json = Document.FromAttributeMap(x).ToJson();
+            return JsonSerializer.Deserialize<CustomerDto>(json);
+        })!;
     }
 
     public async Task<bool> UpdateAsync(CustomerDto customer)
