@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using Amazon.S3;
 using Amazon.SQS;
 using Customers.Api.Database;
 using Customers.Api.Messaging;
@@ -43,6 +44,9 @@ builder.Services.AddSingleton<ICustomerService, CustomerService>();
 builder.Services.AddSingleton<IGitHubService, GitHubService>();
 
 builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
+
+builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+builder.Services.AddSingleton<ICustomerImageServices, CustomerImageService>();
 
 builder.Services.AddHttpClient("GitHub", httpClient =>
 {

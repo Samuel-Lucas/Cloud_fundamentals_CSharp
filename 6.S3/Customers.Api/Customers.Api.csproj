@@ -12,5 +12,6 @@
     <PackageReference Include="AWSSDK.SQS" Version="3.7.100.113"/>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.0"/>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.102.31"/>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.104.2"/>
   </ItemGroup>
 </Project>
