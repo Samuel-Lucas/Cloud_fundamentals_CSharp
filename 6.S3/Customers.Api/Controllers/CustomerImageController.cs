@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Customers.Api.Services;
 using System.Net;
+using Amazon.S3;
 
 namespace Customers.Api.Controllers
 {
@@ -27,7 +28,15 @@ namespace Customers.Api.Controllers
         [HttpGet("customers/{id:guid}/image")]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            return default;
+            try
+            {
+                var response = await _customerImageServices.GetImageAsync(id);
+                return File(response.ResponseStream, response.Headers.ContentType);
+            }
+            catch (AmazonS3Exception ex) when (ex.Message is "The specified keys does not exist")
+            {
+                return NotFound();
+            }
         }
 
         [HttpDelete("customers/{id:guid}/image")]

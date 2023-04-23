@@ -31,12 +31,18 @@ namespace Customers.Api.Services
             return await _s3!.PutObjectAsync(putObjectRequest);
         }
 
-        public async Task<PutObjectResponse> GetImageAsync(Guid id)
+        public async Task<GetObjectResponse> GetImageAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var getObjectRequest = new GetObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = $"image/{id}"
+            };
+
+            return await _s3!.GetObjectAsync(getObjectRequest);
         }
 
-        public async Task<PutObjectResponse> DeleteImageAsync(Guid id)
+        public async Task<DeleteObjectResponse> DeleteImageAsync(Guid id)
         {
             throw new NotImplementedException();
         }
