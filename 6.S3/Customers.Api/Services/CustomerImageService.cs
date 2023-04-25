@@ -44,7 +44,13 @@ namespace Customers.Api.Services
 
         public async Task<DeleteObjectResponse> DeleteImageAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var deleteObjectRequest = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = $"image/{id}"
+            };
+
+            return await _s3!.DeleteObjectAsync(deleteObjectRequest);
         }
     }
 }

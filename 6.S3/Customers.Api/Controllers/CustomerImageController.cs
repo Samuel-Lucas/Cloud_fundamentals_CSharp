@@ -42,7 +42,14 @@ namespace Customers.Api.Controllers
         [HttpDelete("customers/{id:guid}/image")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            return default;
+            var response = await _customerImageServices.DeleteImageAsync(id);
+
+            return response.HttpStatusCode switch
+            {
+                HttpStatusCode.NoContent => Ok(),
+                HttpStatusCode.NotFound => NotFound(),
+                _ => BadRequest()
+            };
         }
     }
 }
