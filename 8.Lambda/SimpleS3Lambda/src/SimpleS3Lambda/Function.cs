@@ -1,7 +1,9 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
 using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Util;
+using SixLabors.ImageSharp.Advanced;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
@@ -43,7 +45,39 @@ public class Function
             try
             {
                 var response = await this.S3Client.GetObjectMetadataAsync(s3Event.Bucket.Name, s3Event.Object.Key);
-                context.Logger.LogInformation(response.Headers.ContentType);
+                
+                if (response.Metadata["x-amz-meta-resized"] == true.ToString())
+                {
+                    context.Logger.LogInformation($"Item with key {s3Event.Object.Key} is already resized");
+                    continue;
+                }
+
+                await using var itemStream = await S3Client.GetObjectStreamAsync(s3Event.Bucket.Name, s3Event.Object.Key,
+                    new Dictionary<string, object>());
+
+                using var outStream  = new MemoryStream();
+
+                using (var image = await Image.LoadAsync(itemStream))
+                {
+                    image.Mutate(x => x.Resize(500, 500, KnownResamplers.Lanczos3));
+                    var originalName = response.Metadata["x-amz-meta-originalname"];
+                    await image.SaveAsync(outStream, image.DetectEncoder(originalName));
+                }
+
+                await S3Client.PutObjectAsync(new PutObjectRequest
+                {
+                    BucketName = s3Event.Bucket.Name,
+                    Key = s3Event.Object.Key,
+                    Metadata = {
+                        ["x-amz-meta-originalname"] = response.Metadata["x-amz-meta-originalname"],
+                        ["x-amz-meta-extension"] = response.Metadata["x-amz-meta-extension"],
+                        ["x-amz-meta-resized"] = true.ToString()
+                    },
+                    ContentType = response.Headers.ContentType,
+                    InputStream = outStream
+                });
+
+                context.Logger.LogInformation($"Resized image with key {s3Event.Object.Key} !");
             }
             catch (Exception e)
             {
